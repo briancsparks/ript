@@ -16,14 +16,11 @@ var cheatCmd = &cobra.Command{
 	Short: "Get away with cheating by generating from template",
 
 	Run: func(cmd *cobra.Command, args []string) {
-		//ript.Cheat(
+		//ript.Cheat2(
 		//  "/home/sparksb/go/src/bcs/tryouts/__go-project-template/one",
 		//  "/home/sparksb/go/src/bcs/tryouts/ript/scratch/one",
 		//)
-		ript.Cheat(
-			"/home/sparksb/go/src/bcs/tryouts/__go-project-template/one",
-			"./one",
-		)
+		ript.Cheat("gocli", "./one")
 	},
 }
 

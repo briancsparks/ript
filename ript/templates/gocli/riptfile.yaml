@@ -1,0 +1,10 @@
+
+nocopy:
+  - go.sum
+
+keys:
+  - projectname
+
+envkeys:
+  RIPTENV_IMFO_USER_IRL_NAME: User IRL Name
+  RIPTENV_IMFO_GITHUB_USEREMAIL: github email

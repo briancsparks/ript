@@ -14,7 +14,13 @@ import (
 	"syscall"
 )
 
-func Cheat(srcDir, destDir string) error {
+func Cheat(tname, destDir string) error {
+	srcDir := "/home/sparksb/go/src/bcs/tryouts/__go-project-template/one"
+	srcDir = filepath.Join(myDirname, "templates", tname)
+	return Cheat2(srcDir, destDir)
+}
+
+func Cheat2(srcDir, destDir string) error {
 
 	var nocopy map[string]string
 	var keys []string
@@ -104,8 +110,10 @@ func Cheat(srcDir, destDir string) error {
 		log.Panic(err)
 	}
 
-	//fmt.Printf("dirnames:\n%v\n", joinMap(&dirnames))
-	//fmt.Printf("filenames:\n%v\n", joinMap(&filenames))
+	if ConfigVerbose() {
+		fmt.Printf("dirnames:\n%v\n", joinMap(&dirnames))
+		fmt.Printf("filenames:\n%v\n", joinMap(&filenames))
+	}
 
 	if ConfigClobber() {
 		// Make dest dirs

@@ -2,6 +2,8 @@ package ript
 
 /* Copyright © 2022 Brian C Sparks <briancsparks@gmail.com> -- MIT (see LICENSE file) */
 
+//go:generate go run genconfig.go
+
 type Config struct {
 	Dryrun    bool
 	NoClobber bool
@@ -14,6 +16,7 @@ func init() {
 	theConfig = &Config{}
 
 	//theConfig.NoClobber = true
+	//theConfig.Verbose = true
 }
 
 func NewConfig(dryrun bool) *Config {
