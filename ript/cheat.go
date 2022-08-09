@@ -4,6 +4,7 @@ package ript
 
 import (
 	"bufio"
+	"embed"
 	"fmt"
 	"github.com/spf13/pflag"
 	"io/fs"
@@ -14,13 +15,16 @@ import (
 	"syscall"
 )
 
+//go:embed all:templates
+var templates embed.FS
+
 func Cheat(tname, destDir string) error {
 	srcDir := "/home/sparksb/go/src/bcs/tryouts/__go-project-template/one"
 	srcDir = filepath.Join(myDirname, "templates", tname)
-	return Cheat2(srcDir, destDir)
+	return Cheat2(srcDir, destDir, tname)
 }
 
-func Cheat2(srcDir, destDir string) error {
+func Cheat2(srcDir, destDir, tname string) error {
 
 	var nocopy map[string]string
 	var keys []string
@@ -66,7 +70,12 @@ func Cheat2(srcDir, destDir string) error {
 	//fmt.Printf("destDir: %v\n", destDir)
 
 	srcFS := os.DirFS(srcDir)
-	err = fs.WalkDir(srcFS, ".", func(shortPath string, d fs.DirEntry, err error) error {
+	root := "."
+	//srcFS := templates
+	//root := "templates/" + tname
+
+	err = fs.WalkDir(srcFS, root, func(shortPath string, d fs.DirEntry, err error) error {
+		//fmt.Printf("shortPath: %v\n", shortPath)
 		if d == nil {
 			return err
 		}
