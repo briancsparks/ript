@@ -4,11 +4,12 @@ package cmd
 
 import (
 	"github.com/briancsparks/ript/ript"
+	"log"
 
 	"github.com/spf13/cobra"
 )
 
-var prj string
+var prj, destDir string
 
 // cheatCmd represents the cheat command
 var cheatCmd = &cobra.Command{
@@ -16,11 +17,11 @@ var cheatCmd = &cobra.Command{
 	Short: "Get away with cheating by generating from template",
 
 	Run: func(cmd *cobra.Command, args []string) {
-		//ript.Cheat2(
-		//  "/home/sparksb/go/src/bcs/tryouts/__go-project-template/one",
-		//  "/home/sparksb/go/src/bcs/tryouts/ript/scratch/one",
-		//)
-		ript.Cheat("gocli", "./one")
+		//err := ript.Cheat("gocli", "./one")
+		err := ript.Cheat(args[0], destDir)
+		if err != nil {
+			log.Fatal(err)
+		}
 	},
 }
 
@@ -37,6 +38,7 @@ func init() {
 	// is called directly, e.g.:
 	// cheatCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	cheatCmd.Flags().StringVar(&prj, "projectname", "projektzero", "help")
+	cheatCmd.Flags().StringVar(&destDir, "dest", "nodestgiven", "The Dir")
 
 	bindFlags(cheatCmd)
 }

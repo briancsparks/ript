@@ -8,6 +8,7 @@ type Config struct {
 	Dryrun    bool
 	NoClobber bool
 	Verbose   bool
+	LogApis   bool
 }
 
 var theConfig *Config
@@ -17,6 +18,7 @@ func init() {
 
 	//theConfig.NoClobber = true
 	//theConfig.Verbose = true
+	//theConfig.LogApis = true
 }
 
 func NewConfig(dryrun bool) *Config {
@@ -47,4 +49,8 @@ func ConfigClobber() bool {
 
 func ConfigVerbose() bool {
 	return theConfig.Verbose
+}
+
+func ConfigLogApis() bool {
+	return theConfig.LogApis
 }
