@@ -23,8 +23,8 @@ func Cheat(tname, destDir string) error {
     fmt.Printf("API(Cheat): tname: %v, dest: %s\n", tname, destDir)
   }
 
-  srcDir := "/home/sparksb/go/src/bcs/tryouts/__go-project-template/one"
-  srcDir = filepath.Join(myDirname, "templates", tname)
+  //srcDir := "/home/sparksb/go/src/bcs/tryouts/__go-project-template/one"
+  srcDir := filepath.Join(myDirname, "templates", tname)
   return Cheat2(srcDir, destDir, tname)
 }
 
@@ -38,9 +38,14 @@ func Cheat2(srcDir, destDir, tname string) error {
   var envkeys map[string]string
 
   riptfilename := filepath.Join(srcDir, "riptfile.yaml")
-  nocopy, keys, envkeys, err := readRiptfile(riptfilename)
+  nocopy, keys, envkeys, missingenv, err := readRiptfile(riptfilename)
   if err != nil {
     return err
+  }
+
+  if len(missingenv) > 0 {
+    fmt.Printf("Missing ENVs: %v\n", missingenv)
+    return fmt.Errorf("Missing ENVs: %v\n", missingenv)
   }
 
   nocopy["riptfile.yaml"] = "riptfile.yaml"
@@ -89,7 +94,7 @@ func Cheat2(srcDir, destDir, tname string) error {
     if ConfigVerbose() {
       fmt.Printf("shortPath: %v\n", shortPath)
     }
-    
+
     if d == nil {
       return err
     }
