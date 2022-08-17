@@ -16,7 +16,7 @@ var theConfig *Config
 func init() {
 	theConfig = &Config{}
 
-	//theConfig.NoClobber = true
+	theConfig.NoClobber = true
 	//theConfig.Verbose = true
 	//theConfig.LogApis = true
 }
