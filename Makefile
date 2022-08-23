@@ -3,6 +3,12 @@ dev:
 	go run main/ript.go cheat gocli --projectname=ript --dest=../scratch/one
 
 
-cleanscratch:
-  test -d ../scratch/one/ && rm -rf ../scratch/one
+cleandev:
+	rm -rf ../scratch/one/ && mkdir -p ../scratch/one/
+
+devntrun: dev
+	cd ../scratch/one/
+	go mod tidy
+	go run main/ript.go
+
 
