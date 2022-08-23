@@ -4,6 +4,7 @@ package ript
 
 import (
 	"fmt"
+	"strings"
 )
 
 func first(m map[string]string) (string, string, bool) {
@@ -44,4 +45,11 @@ func joinMap(m *map[string]string) string {
 		result += fmt.Sprintf("%-32s: %s\n", k, v)
 	}
 	return result
+}
+
+func trimPrefix(s, prefix string) string {
+	if strings.HasPrefix(s, prefix) {
+		return s[len(prefix):]
+	}
+	return s
 }
