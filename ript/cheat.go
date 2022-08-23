@@ -78,7 +78,7 @@ func Cheat2(srcDir, destDir, tname string) error {
 	}
 	//                                                                        --------------------------
 
-	if IsProd() {
+	if IsProd() || ConfigUseVersion() == 1 {
 		return cheatTarfile(srcDir, destDir, tname, nocopy, replacements)
 	}
 
@@ -137,10 +137,28 @@ func Cheat2(srcDir, destDir, tname string) error {
 		//info, _ := d.Info()
 		//fmt.Printf("%s: dirent: %v; err: %v\n", shortPath, info, err)
 
-		if d.IsDir() {
-			dirnames[srcPath] = destPath
+		if ConfigUseVersion() == 2 {
+			if d.IsDir() {
+				err := os.MkdirAll(destPath, fi.Mode())
+				if err != nil {
+					log.Panic(err)
+				}
+
+			} else {
+				srcFd, err := os.Open(srcPath)
+				if err != nil {
+					log.Panic(err)
+				}
+
+				putFile(srcFd, destPath, replacements, fi.Mode())
+			}
+
 		} else {
-			filenames[srcPath] = destPath
+			if d.IsDir() {
+				dirnames[srcPath] = destPath
+			} else {
+				filenames[srcPath] = destPath
+			}
 		}
 
 		return nil
@@ -154,99 +172,75 @@ func Cheat2(srcDir, destDir, tname string) error {
 		fmt.Printf("filenames:\n%v\n", joinMap(&filenames))
 	}
 
-	if ConfigClobber() {
-		// Make dest dirs
-		_ = syscall.Umask(0)
-		for _, dirname := range dirnames {
-			err := os.MkdirAll(dirname, os.FileMode(0755)) // TODO: Magic number
-			if err != nil && !os.IsExist(err) {
-				log.Panic(err)
+	if ConfigUseVersion() == 0 {
+		if ConfigClobber() {
+			// Make dest dirs
+			_ = syscall.Umask(0)
+			for _, dirname := range dirnames {
+				err := os.MkdirAll(dirname, os.FileMode(0755)) // TODO: Magic number
+				if err != nil && !os.IsExist(err) {
+					log.Panic(err)
+				}
 			}
 		}
-	}
 
-	if ConfigClobber() {
-		// Copy files
-		for src, dest := range filenames {
-			func(src, dest string) {
-				srcFd, err := os.Open(src)
-				if err != nil {
-					log.Panic(err)
-				}
-				defer srcFd.Close()
+		if ConfigClobber() {
+			// Copy files
+			for src, dest := range filenames {
+				func(src, dest string) {
+					srcFd, err := os.Open(src)
+					if err != nil {
+						log.Panic(err)
+					}
+					defer srcFd.Close()
 
-				//destFd, err := os.Create(dest)
-				destFd, err := os.OpenFile(dest, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644) // TODO: Magic number
-				if err != nil {
-					log.Panic(err)
-				}
-				defer destFd.Close()
+					//destFd, err := os.Create(dest)
+					destFd, err := os.OpenFile(dest, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644) // TODO: Magic number
+					if err != nil {
+						log.Panic(err)
+					}
+					defer destFd.Close()
 
-				datawriter := bufio.NewWriter(destFd)
+					datawriter := bufio.NewWriter(destFd)
 
-				scanner := bufio.NewScanner(srcFd)
-				for scanner.Scan() {
-					line := scanner.Text()
-					line = replaceEmAll(line, replacements)
-					datawriter.WriteString(line + "\n")
-				}
-				if err := scanner.Err(); err != nil {
-					log.Panic(err)
-				}
-				datawriter.Flush()
+					scanner := bufio.NewScanner(srcFd)
+					for scanner.Scan() {
+						line := scanner.Text()
+						line = replaceEmAll(line, replacements)
+						datawriter.WriteString(line + "\n")
+					}
+					if err := scanner.Err(); err != nil {
+						log.Panic(err)
+					}
+					datawriter.Flush()
 
-			}(src, dest)
+				}(src, dest)
+			}
 		}
 	}
 
 	return nil
 }
 
-//func putFileTotallyBroken(destName, srcName string, srcFd io.ReadCloser, replacements map[string]string, perm os.FileMode) {
-//  defer srcFd.Close()
-//
-//  dest := replaceEmAll(srcName, replacements)
-//  dest = destName
-//
-//  if ConfigClobber() {
-//    func(srcFd io.Reader, dest string, perm os.FileMode) {
-//      destFd, err := os.OpenFile(dest, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
-//      if err != nil {
-//        log.Panic(err)
-//      }
-//      defer destFd.Close()
-//
-//      datawriter := bufio.NewWriter(destFd)
-//
-//      linelen := 0
-//      linenum := 0
-//      var line string
-//      scanner := bufio.NewScanner(srcFd)
-//      for scanner.Scan() {
-//        linenum += 1
-//        line = scanner.Text()
-//        linelen = len(line)
-//        line = replaceEmAll(line, replacements)
-//        count, err := datawriter.WriteString(line + "\n")
-//        if err != nil {
-//          log.Panic(err)
-//        }
-//        fmt.Printf("%04d count: %v %v %s", linenum, linelen, count, line)
-//      }
-//      if err := scanner.Err(); err != nil {
-//        log.Panic(err)
-//      }
-//      datawriter.Flush()
-//    }(srcFd, dest, perm)
-//
-//    //replacer := NewReplacer(src, replacements)
-//    //count, err := io.Copy(destFd, replacer)
-//    //if err != nil {
-//    //	log.Panic(err)
-//    //}
-//    //_ = count
-//  }
-//}
+func putFile(srcFd io.ReadCloser, destName string, replacements map[string]string, perm os.FileMode) {
+	defer srcFd.Close()
+
+	if ConfigClobber() {
+		destFd, err := os.OpenFile(destName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
+		if err != nil {
+			log.Panic(err)
+		}
+		defer destFd.Close()
+
+		replacer := NewReplacer(srcFd, replacements)
+		count, err := io.Copy(destFd, replacer)
+		if err != nil {
+			log.Panic(err)
+		}
+		_ = count
+
+	}
+}
 
 func cheatTarfile(srcDir, destDir, tname string, nocopy map[string]string, replacements map[string]string) error {
 	_, _, _, _, _ = srcDir, destDir, tname, nocopy, replacements
@@ -303,18 +297,12 @@ func cheatTarfile(srcDir, destDir, tname string, nocopy map[string]string, repla
 				}
 				defer destFd.Close()
 
-				datawriter := bufio.NewWriter(destFd)
-
-				scanner := bufio.NewScanner(tr)
-				for scanner.Scan() {
-					line := scanner.Text()
-					line = replaceEmAll(line, replacements)
-					datawriter.WriteString(line + "\n")
-				}
-				if err := scanner.Err(); err != nil {
+				replacer := NewReplacer(tr, replacements)
+				count, err := io.Copy(destFd, replacer)
+				if err != nil {
 					log.Panic(err)
 				}
-				datawriter.Flush()
+				_ = count
 
 			}(pathname)
 		}
@@ -323,6 +311,82 @@ func cheatTarfile(srcDir, destDir, tname string, nocopy map[string]string, repla
 
 	return nil
 }
+
+//func cheatTarfile0(srcDir, destDir, tname string, nocopy map[string]string, replacements map[string]string) error {
+//	_, _, _, _, _ = srcDir, destDir, tname, nocopy, replacements
+//
+//	srcFS := templates
+//
+//	tarFilename := filepath.Join("templates", tname+".tar")
+//
+//	tarfile, err := srcFS.Open(tarFilename)
+//	if err != nil {
+//		log.Panic(err)
+//	}
+//	defer tarfile.Close()
+//
+//	tr := tar.NewReader(tarfile)
+//	for {
+//		hdr, err := tr.Next()
+//		if err == io.EOF {
+//			break // End of archive
+//		}
+//		if err != nil {
+//			log.Panic(err)
+//		}
+//		//fi := hdr.FileInfo()
+//
+//		// If this is the root, skip
+//		if hdr.Name == tname+"/" {
+//			continue
+//		}
+//
+//		pathname := filepath.Join(destDir, trimPrefix(hdr.Name, tname+"/"))
+//		pathname = replaceEmAll(pathname, replacements)
+//
+//		if isDir(hdr) {
+//			err = os.MkdirAll(pathname, os.FileMode(hdr.Mode))
+//			if err != nil {
+//				log.Panic(err)
+//			}
+//			continue
+//		}
+//
+//		_, present := nocopy[filepath.Base(hdr.Name)]
+//		if present {
+//			continue
+//		}
+//
+//		if ConfigClobber() {
+//			// Copy files
+//			func(dest string) {
+//
+//				destFd, err := os.OpenFile(dest, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.FileMode(hdr.Mode))
+//				if err != nil {
+//					log.Panic(err)
+//				}
+//				defer destFd.Close()
+//
+//				datawriter := bufio.NewWriter(destFd)
+//
+//				scanner := bufio.NewScanner(tr)
+//				for scanner.Scan() {
+//					line := scanner.Text()
+//					line = replaceEmAll(line, replacements)
+//					datawriter.WriteString(line + "\n")
+//				}
+//				if err := scanner.Err(); err != nil {
+//					log.Panic(err)
+//				}
+//				datawriter.Flush()
+//
+//			}(pathname)
+//		}
+//		//_, _ = hdr, fi
+//	}
+//
+//	return nil
+//}
 
 func isDir(hdr *tar.Header) bool {
 	if strings.HasSuffix(hdr.Name, "/") {

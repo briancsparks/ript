@@ -4,7 +4,6 @@ package ript
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 )
 
@@ -35,14 +34,14 @@ func (rplr *Replacer) Read(p []byte) (int, error) {
 	xerr := rplr.scanner.Err()
 
 	var line string
-	var linelen int
+	//var linelen int
 	if rplr.scanner.Scan() {
 		line = rplr.scanner.Text()
-		linelen = len(line)
+		//linelen = len(line)
 		line = replaceEmAll(line, rplr.replacements)
 		count = copy(p, line+"\n")
 		rplr.numLines += 1
-		fmt.Printf("%04d count: %v %v %s\n", rplr.numLines, linelen, count, line)
+		//fmt.Printf("%04d count: %v %v %s\n", rplr.numLines, linelen, count, line)
 
 	} else {
 		// Scan() failed, end
