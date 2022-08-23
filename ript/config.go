@@ -4,11 +4,16 @@ package ript
 
 //go:generate go run genconfig.go
 
+//go:generate ./gentemplates.sh
+
 type Config struct {
-	Dryrun    bool
-	NoClobber bool
-	Verbose   bool
-	LogApis   bool
+	Dryrun       bool
+	NoClobber    bool
+	Verbose      bool
+	LogApis      bool
+	VersionToUse int
+
+	ActiveD bool
 }
 
 var theConfig *Config
@@ -16,9 +21,14 @@ var theConfig *Config
 func init() {
 	theConfig = &Config{}
 
-	theConfig.NoClobber = true
+	theConfig.ActiveD = true
+
+	//theConfig.NoClobber = true
 	//theConfig.Verbose = true
 	//theConfig.LogApis = true
+	//theConfig.VersionToUse = 0 // 0 == orig
+	theConfig.VersionToUse = 1 // 1 == tarfile
+	//theConfig.VersionToUse = 2 // 2 == old, but in walk callback
 }
 
 func NewConfig(dryrun bool) *Config {
@@ -53,4 +63,27 @@ func ConfigVerbose() bool {
 
 func ConfigLogApis() bool {
 	return theConfig.LogApis
+}
+
+func ConfigUseVersion() int {
+	return theConfig.VersionToUse
+}
+
+func ConfigIsActiveD() bool {
+	return theConfig.ActiveD
+}
+
+func ActiveD() bool {
+	return ConfigIsActiveD()
+}
+
+func IsProd() bool {
+	return !ActiveD()
+}
+
+func ConfigIf(n int) bool {
+	if n == 0 {
+		return false
+	}
+	return true
 }

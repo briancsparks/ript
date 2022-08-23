@@ -3,10 +3,12 @@ package ript
 /* Copyright © 2022 Brian C Sparks <briancsparks@gmail.com> -- MIT (see LICENSE file) */
 
 import (
+	"archive/tar"
 	"bufio"
 	"embed"
 	"fmt"
 	"github.com/spf13/pflag"
+	"io"
 	"io/fs"
 	"log"
 	"os"
@@ -76,13 +78,18 @@ func Cheat2(srcDir, destDir, tname string) error {
 	}
 	//                                                                        --------------------------
 
+	if IsProd() {
+		return cheatTarfile(srcDir, destDir, tname, nocopy, replacements)
+	}
+
+	// ================================================
+	// Active Development :)
+
 	filenames := map[string]string{}
 	dirnames := map[string]string{}
 
 	srcFS := os.DirFS(srcDir)
 	root := "."
-	//srcFS := templates
-	//root := "templates/" + tname
 
 	if ConfigVerbose() {
 		fmt.Printf("srcDir: %v\n", srcDir)
@@ -98,6 +105,9 @@ func Cheat2(srcDir, destDir, tname string) error {
 		if d == nil {
 			return err
 		}
+
+		fi, err := d.Info()
+		_, _ = fi, err
 
 		// Save a bunch of work
 		if d.IsDir() {
@@ -132,6 +142,7 @@ func Cheat2(srcDir, destDir, tname string) error {
 		} else {
 			filenames[srcPath] = destPath
 		}
+
 		return nil
 	})
 	if err != nil {
@@ -189,6 +200,135 @@ func Cheat2(srcDir, destDir, tname string) error {
 	}
 
 	return nil
+}
+
+//func putFileTotallyBroken(destName, srcName string, srcFd io.ReadCloser, replacements map[string]string, perm os.FileMode) {
+//  defer srcFd.Close()
+//
+//  dest := replaceEmAll(srcName, replacements)
+//  dest = destName
+//
+//  if ConfigClobber() {
+//    func(srcFd io.Reader, dest string, perm os.FileMode) {
+//      destFd, err := os.OpenFile(dest, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
+//      if err != nil {
+//        log.Panic(err)
+//      }
+//      defer destFd.Close()
+//
+//      datawriter := bufio.NewWriter(destFd)
+//
+//      linelen := 0
+//      linenum := 0
+//      var line string
+//      scanner := bufio.NewScanner(srcFd)
+//      for scanner.Scan() {
+//        linenum += 1
+//        line = scanner.Text()
+//        linelen = len(line)
+//        line = replaceEmAll(line, replacements)
+//        count, err := datawriter.WriteString(line + "\n")
+//        if err != nil {
+//          log.Panic(err)
+//        }
+//        fmt.Printf("%04d count: %v %v %s", linenum, linelen, count, line)
+//      }
+//      if err := scanner.Err(); err != nil {
+//        log.Panic(err)
+//      }
+//      datawriter.Flush()
+//    }(srcFd, dest, perm)
+//
+//    //replacer := NewReplacer(src, replacements)
+//    //count, err := io.Copy(destFd, replacer)
+//    //if err != nil {
+//    //	log.Panic(err)
+//    //}
+//    //_ = count
+//  }
+//}
+
+func cheatTarfile(srcDir, destDir, tname string, nocopy map[string]string, replacements map[string]string) error {
+	_, _, _, _, _ = srcDir, destDir, tname, nocopy, replacements
+
+	srcFS := templates
+
+	tarFilename := filepath.Join("templates", tname+".tar")
+
+	tarfile, err := srcFS.Open(tarFilename)
+	if err != nil {
+		log.Panic(err)
+	}
+	defer tarfile.Close()
+
+	tr := tar.NewReader(tarfile)
+	for {
+		hdr, err := tr.Next()
+		if err == io.EOF {
+			break // End of archive
+		}
+		if err != nil {
+			log.Panic(err)
+		}
+		//fi := hdr.FileInfo()
+
+		// If this is the root, skip
+		if hdr.Name == tname+"/" {
+			continue
+		}
+
+		pathname := filepath.Join(destDir, trimPrefix(hdr.Name, tname+"/"))
+		pathname = replaceEmAll(pathname, replacements)
+
+		if isDir(hdr) {
+			err = os.MkdirAll(pathname, os.FileMode(hdr.Mode))
+			if err != nil {
+				log.Panic(err)
+			}
+			continue
+		}
+
+		_, present := nocopy[filepath.Base(hdr.Name)]
+		if present {
+			continue
+		}
+
+		if ConfigClobber() {
+			// Copy files
+			func(dest string) {
+
+				destFd, err := os.OpenFile(dest, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.FileMode(hdr.Mode))
+				if err != nil {
+					log.Panic(err)
+				}
+				defer destFd.Close()
+
+				datawriter := bufio.NewWriter(destFd)
+
+				scanner := bufio.NewScanner(tr)
+				for scanner.Scan() {
+					line := scanner.Text()
+					line = replaceEmAll(line, replacements)
+					datawriter.WriteString(line + "\n")
+				}
+				if err := scanner.Err(); err != nil {
+					log.Panic(err)
+				}
+				datawriter.Flush()
+
+			}(pathname)
+		}
+		//_, _ = hdr, fi
+	}
+
+	return nil
+}
+
+func isDir(hdr *tar.Header) bool {
+	if strings.HasSuffix(hdr.Name, "/") {
+		return true
+	}
+	return false
 }
 
 func replaceEmAll(str string, replacements map[string]string) string {

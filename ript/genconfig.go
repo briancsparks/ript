@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	f, err := os.Create("config_gen.go")
+	f, err := os.Create("config_generated.go")
 	if err != nil {
 		log.Fatal(err)
 	}
