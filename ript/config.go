@@ -27,8 +27,8 @@ func init() {
 	//theConfig.Verbose = true
 	//theConfig.LogApis = true
 	//theConfig.VersionToUse = 0 // 0 == orig
-	theConfig.VersionToUse = 1 // 1 == tarfile
-	//theConfig.VersionToUse = 2 // 2 == old, but in walk callback
+	//theConfig.VersionToUse = 1 // 1 == tarfile
+	theConfig.VersionToUse = 2 // 2 == old, but in walk callback
 }
 
 func NewConfig(dryrun bool) *Config {
