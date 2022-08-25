@@ -4,4 +4,4 @@ package ript
 
 /* Copyright © 2022 Brian C Sparks <briancsparks@gmail.com> -- MIT (see LICENSE file) */
 
-var myDirname string = "/home/sparksb/go/src/bcs/tryouts/ript/one/ript"
+var myDirname string = "/home/sparksb/go/src/bcs/ript/ript"

@@ -1,19 +1,19 @@
 
 dev:
-	go run main/ript.go cheat gocli --projectname=ript --dest=../scratch/one
+	go run ript.go cheat gocli --projectname=ript --dest=../scratch/one
 
 
 cleandev:
 	rm -rf ../scratch/one/ && mkdir -p ../scratch/one/
 
 devandtestrun: dev
-	cd ../scratch/one/; go mod tidy; go run main/ript.go
+	mkdir -p ../scratch/one/; cd ../scratch/one/; go mod tidy; go run ript.go
 
-generate: ript/config_generated.go ript/templates/gocli.tar
+generate: ript/config_generated.go
 	go generate ./...
 
 ript.exe: generate
-	go build -o ./ript.exe main/ript.go
+	go build -o ./ript.exe ript.go
 
 buildrel: ript.exe
 
