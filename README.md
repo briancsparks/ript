@@ -1,6 +1,6 @@
 # Hello Fooprojectname
 
-## Ript is Replace-In-File sans Template Engine
+## Ript is Replace-In-File sans the Template Engine
 
 Template engines are great, but are overkill in many situations. If you don't need the power -
 like when generating a project's files - it is convenient to just have files - sans template engine.
