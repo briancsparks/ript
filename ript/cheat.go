@@ -42,6 +42,7 @@ func Cheat2(srcDir, destDir, tname string) error {
 	riptfilename := filepath.Join(srcDir, "riptfile.yaml")
 	nocopy, keys, envkeys, missingenv, err := readRiptfile(riptfilename)
 	if err != nil {
+		fmt.Printf("Cannot open riptfilename: %v\n  Is your template name (%s) right?\n\n", riptfilename, tname)
 		return err
 	}
 
@@ -112,6 +113,7 @@ func Cheat2(srcDir, destDir, tname string) error {
 		// Save a bunch of work
 		if d.IsDir() {
 			if shortPath == "." {
+				mkdirp(destDir, fi.Mode())
 				return nil
 			}
 			if shortPath == ".git" || shortPath == "node_modules" || shortPath == ".idea" {
@@ -139,10 +141,7 @@ func Cheat2(srcDir, destDir, tname string) error {
 
 		if ConfigUseVersion() == 2 {
 			if d.IsDir() {
-				err := os.MkdirAll(destPath, fi.Mode())
-				if err != nil {
-					log.Panic(err)
-				}
+				mkdirp(destPath, fi.Mode())
 
 			} else {
 				srcFd, err := os.Open(srcPath)
@@ -225,9 +224,14 @@ func Cheat2(srcDir, destDir, tname string) error {
 func putFile(srcFd io.ReadCloser, destName string, replacements map[string]string, perm os.FileMode) {
 	defer srcFd.Close()
 
+	if ConfigVerbose() {
+		fmt.Printf("putFile : %v :%s\n", perm, destName)
+	}
+
 	if ConfigClobber() {
 		destFd, err := os.OpenFile(destName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
 		if err != nil {
+			fmt.Printf("While trying to create %s\n", destName)
 			log.Panic(err)
 		}
 		defer destFd.Close()

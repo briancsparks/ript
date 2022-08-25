@@ -23,9 +23,10 @@ func init() {
 
 	theConfig.ActiveD = true
 
-	//theConfig.NoClobber = true
 	//theConfig.Verbose = true
 	//theConfig.LogApis = true
+
+	//theConfig.NoClobber = true
 	//theConfig.VersionToUse = 0 // 0 == orig
 	//theConfig.VersionToUse = 1 // 1 == tarfile
 	theConfig.VersionToUse = 2 // 2 == old, but in walk callback

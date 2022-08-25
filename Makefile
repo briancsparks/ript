@@ -18,5 +18,4 @@ ript.exe: generate
 buildrel: ript.exe
 
 installlocal: generate
-	echo go build -o $(HOME)/bin/ript ript.go
 	go build -o $(HOME)/bin/ript ript.go
