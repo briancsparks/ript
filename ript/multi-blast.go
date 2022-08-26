@@ -9,7 +9,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"syscall"
 )
 
 type MultiBlast struct {
@@ -129,7 +128,7 @@ func (m *MultiBlast) mkdirpify(dir string) (bool, error) {
 
 func (m *MultiBlast) umaskify() {
 	if !m.umasked {
-		_ = syscall.Umask(0)
+		//_ = syscall.Umask(0)          /* TODO: Figure out how to put this back */
 		//fmt.Printf("Old umask: %d\n", old)
 		m.umasked = true
 	}

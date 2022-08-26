@@ -4,6 +4,8 @@ package ript
 
 //go:generate go run genconfig.go
 
+// TODO: on Windows, this does not work. Use a .go file
+
 //go:generate ./gentemplates.sh
 
 type Config struct {

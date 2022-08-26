@@ -9,6 +9,8 @@ import (
 	"os"
 )
 
+// TODO: config_generated.go should not be checked in to git
+
 func main() {
 	f, err := os.Create("config_generated.go")
 	if err != nil {
@@ -31,7 +33,7 @@ package ript
 
 `)
 
-	fmt.Fprintf(w, "var myDirname string = \"%s\"\n", cwd)
+	fmt.Fprintf(w, "var myDirname string = `%s`\n", cwd)
 
 	w.Flush()
 }

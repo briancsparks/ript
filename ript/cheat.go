@@ -14,7 +14,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"syscall"
 )
 
 //go:embed all:templates
@@ -174,7 +173,7 @@ func Cheat2(srcDir, destDir, tname string) error {
 	if ConfigUseVersion() == 0 {
 		if ConfigClobber() {
 			// Make dest dirs
-			_ = syscall.Umask(0)
+			//_ = syscall.Umask(0)          /* TODO: Figure out how to put this back */
 			for _, dirname := range dirnames {
 				err := os.MkdirAll(dirname, os.FileMode(0755)) // TODO: Magic number
 				if err != nil && !os.IsExist(err) {
