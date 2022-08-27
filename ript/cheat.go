@@ -19,6 +19,9 @@ import (
 //go:embed all:templates
 var templates embed.FS
 
+// TODO: gocli template: Put riptprojectname.go into cmd/main/riptprojectname.go
+// TODO: Add a Makefile to gocli
+
 func Cheat(tname, destDir string) error {
 	if ConfigLogApis() {
 		fmt.Printf("API(Cheat): tname: %v, dest: %s\n", tname, destDir)
