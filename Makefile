@@ -7,7 +7,7 @@ cleandev:
 	rm -rf ../scratch/one/ && mkdir -p ../scratch/one/
 
 devandtestrun: dev
-	mkdir -p ../scratch/one/; cd ../scratch/one/; go mod tidy; go run cmd/main/ript.go
+	mkdir -p ../scratch/one/; cd ../scratch/one/; go mod tidy; make dev
 
 generate: ript/config_generated.go
 	go generate ./...
