@@ -25,7 +25,7 @@ func Cheat(tname, destDir string) error {
 	}
 
 	//srcDir := "/home/sparksb/go/src/bcs/tryouts/__go-project-template/one"
-	srcDir := filepath.Join(myDirname, "templates", tname)
+	srcDir := filepath.Join(MyDirname, "templates", tname)
 	return Cheat2(srcDir, destDir, tname)
 }
 
