@@ -4,6 +4,8 @@ package ript
 
 //go:generate go run genconfig.go
 
+// TODO: on Windows, this does not work. Use a .go file
+
 //go:generate ./gentemplates.sh
 
 type Config struct {
@@ -23,9 +25,10 @@ func init() {
 
 	theConfig.ActiveD = true
 
-	//theConfig.NoClobber = true
 	//theConfig.Verbose = true
 	//theConfig.LogApis = true
+
+	//theConfig.NoClobber = true
 	//theConfig.VersionToUse = 0 // 0 == orig
 	//theConfig.VersionToUse = 1 // 1 == tarfile
 	theConfig.VersionToUse = 2 // 2 == old, but in walk callback

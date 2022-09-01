@@ -14,7 +14,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"syscall"
 )
 
 //go:embed all:templates
@@ -42,6 +41,7 @@ func Cheat2(srcDir, destDir, tname string) error {
 	riptfilename := filepath.Join(srcDir, "riptfile.yaml")
 	nocopy, keys, envkeys, missingenv, err := readRiptfile(riptfilename)
 	if err != nil {
+		fmt.Printf("Cannot open riptfilename: %v\n  Is your template name (%s) right?\n\n", riptfilename, tname)
 		return err
 	}
 
@@ -112,6 +112,7 @@ func Cheat2(srcDir, destDir, tname string) error {
 		// Save a bunch of work
 		if d.IsDir() {
 			if shortPath == "." {
+				mkdirp(destDir, fi.Mode())
 				return nil
 			}
 			if shortPath == ".git" || shortPath == "node_modules" || shortPath == ".idea" {
@@ -139,10 +140,7 @@ func Cheat2(srcDir, destDir, tname string) error {
 
 		if ConfigUseVersion() == 2 {
 			if d.IsDir() {
-				err := os.MkdirAll(destPath, fi.Mode())
-				if err != nil {
-					log.Panic(err)
-				}
+				mkdirp(destPath, fi.Mode())
 
 			} else {
 				srcFd, err := os.Open(srcPath)
@@ -175,7 +173,7 @@ func Cheat2(srcDir, destDir, tname string) error {
 	if ConfigUseVersion() == 0 {
 		if ConfigClobber() {
 			// Make dest dirs
-			_ = syscall.Umask(0)
+			//_ = syscall.Umask(0)          /* TODO: Figure out how to put this back */
 			for _, dirname := range dirnames {
 				err := os.MkdirAll(dirname, os.FileMode(0755)) // TODO: Magic number
 				if err != nil && !os.IsExist(err) {
@@ -225,9 +223,14 @@ func Cheat2(srcDir, destDir, tname string) error {
 func putFile(srcFd io.ReadCloser, destName string, replacements map[string]string, perm os.FileMode) {
 	defer srcFd.Close()
 
+	if ConfigVerbose() {
+		fmt.Printf("putFile : %v :%s\n", perm, destName)
+	}
+
 	if ConfigClobber() {
 		destFd, err := os.OpenFile(destName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
 		if err != nil {
+			fmt.Printf("While trying to create %s\n", destName)
 			log.Panic(err)
 		}
 		defer destFd.Close()

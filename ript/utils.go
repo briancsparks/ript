@@ -4,6 +4,8 @@ package ript
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"strings"
 )
 
@@ -52,4 +54,17 @@ func trimPrefix(s, prefix string) string {
 		return s[len(prefix):]
 	}
 	return s
+}
+
+func mkdirp(destPath string, perm os.FileMode) error {
+	if ConfigVerbose() {
+		fmt.Printf("mkdir -p : %x :%s\n", perm, destPath)
+	}
+
+	err := os.MkdirAll(destPath, perm)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	return nil
 }
