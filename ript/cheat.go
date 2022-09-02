@@ -258,6 +258,8 @@ func cheatTarfile(srcDir, destDir, tname string, nocopy map[string]string, repla
 	}
 	defer tarfile.Close()
 
+	mkdirp(destDir, 0755) // TODO: Magic number
+
 	tr := tar.NewReader(tarfile)
 	for {
 		hdr, err := tr.Next()
@@ -267,14 +269,8 @@ func cheatTarfile(srcDir, destDir, tname string, nocopy map[string]string, repla
 		if err != nil {
 			log.Panic(err)
 		}
-		//fi := hdr.FileInfo()
 
-		// If this is the root, skip
-		if hdr.Name == tname+"/" {
-			continue
-		}
-
-		pathname := filepath.Join(destDir, trimPrefix(hdr.Name, tname+"/"))
+		pathname := filepath.Join(destDir, hdr.Name)
 		pathname = replaceEmAll(pathname, replacements)
 
 		if isDir(hdr) {
@@ -291,6 +287,12 @@ func cheatTarfile(srcDir, destDir, tname string, nocopy map[string]string, repla
 		}
 
 		if ConfigClobber() {
+			theDir := filepath.Dir(pathname)
+			err = os.MkdirAll(theDir, 0755) // TODO: Magic Number
+			if err != nil {
+				log.Print(err)
+			}
+
 			// Copy files
 			func(dest string) {
 
@@ -309,87 +311,10 @@ func cheatTarfile(srcDir, destDir, tname string, nocopy map[string]string, repla
 
 			}(pathname)
 		}
-		//_, _ = hdr, fi
 	}
 
 	return nil
 }
-
-//func cheatTarfile0(srcDir, destDir, tname string, nocopy map[string]string, replacements map[string]string) error {
-//	_, _, _, _, _ = srcDir, destDir, tname, nocopy, replacements
-//
-//	srcFS := templates
-//
-//	tarFilename := filepath.Join("templates", tname+".tar")
-//
-//	tarfile, err := srcFS.Open(tarFilename)
-//	if err != nil {
-//		log.Panic(err)
-//	}
-//	defer tarfile.Close()
-//
-//	tr := tar.NewReader(tarfile)
-//	for {
-//		hdr, err := tr.Next()
-//		if err == io.EOF {
-//			break // End of archive
-//		}
-//		if err != nil {
-//			log.Panic(err)
-//		}
-//		//fi := hdr.FileInfo()
-//
-//		// If this is the root, skip
-//		if hdr.Name == tname+"/" {
-//			continue
-//		}
-//
-//		pathname := filepath.Join(destDir, trimPrefix(hdr.Name, tname+"/"))
-//		pathname = replaceEmAll(pathname, replacements)
-//
-//		if isDir(hdr) {
-//			err = os.MkdirAll(pathname, os.FileMode(hdr.Mode))
-//			if err != nil {
-//				log.Panic(err)
-//			}
-//			continue
-//		}
-//
-//		_, present := nocopy[filepath.Base(hdr.Name)]
-//		if present {
-//			continue
-//		}
-//
-//		if ConfigClobber() {
-//			// Copy files
-//			func(dest string) {
-//
-//				destFd, err := os.OpenFile(dest, os.O_APPEND|os.O_CREATE|os.O_WRONLY, os.FileMode(hdr.Mode))
-//				if err != nil {
-//					log.Panic(err)
-//				}
-//				defer destFd.Close()
-//
-//				datawriter := bufio.NewWriter(destFd)
-//
-//				scanner := bufio.NewScanner(tr)
-//				for scanner.Scan() {
-//					line := scanner.Text()
-//					line = replaceEmAll(line, replacements)
-//					datawriter.WriteString(line + "\n")
-//				}
-//				if err := scanner.Err(); err != nil {
-//					log.Panic(err)
-//				}
-//				datawriter.Flush()
-//
-//			}(pathname)
-//		}
-//		//_, _ = hdr, fi
-//	}
-//
-//	return nil
-//}
 
 func isDir(hdr *tar.Header) bool {
 	if strings.HasSuffix(hdr.Name, "/") {
