@@ -18,6 +18,8 @@ var cheatCmd = &cobra.Command{
 
 	Run: func(cmd *cobra.Command, args []string) {
 		//err := ript.Cheat("gocli", "./one")
+
+		// TODO: Call Cheat2
 		err := ript.Cheat(args[0], destDir)
 		if err != nil {
 			log.Fatal(err)

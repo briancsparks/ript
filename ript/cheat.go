@@ -19,6 +19,8 @@ import (
 //go:embed all:templates
 var templates embed.FS
 
+// -------------------------------------------------------------------------------------------------------------------
+
 func Cheat(tname, destDir string) error {
 	if ConfigLogApis() {
 		fmt.Printf("API(Cheat): tname: %v, dest: %s\n", tname, destDir)
@@ -26,12 +28,14 @@ func Cheat(tname, destDir string) error {
 
 	//srcDir := "/home/sparksb/go/src/bcs/tryouts/__go-project-template/one"
 	srcDir := filepath.Join(MyDirname, "templates", tname)
-	return Cheat2(srcDir, destDir, tname)
+	return CheatB(srcDir, destDir, tname)
 }
 
-func Cheat2(srcDir, destDir, tname string) error {
+// -------------------------------------------------------------------------------------------------------------------
+
+func CheatB(srcDir, destDir, tname string) error {
 	if ConfigLogApis() {
-		fmt.Printf("API(Cheat2): srcDir: %v, destDir: %s\n", srcDir, destDir)
+		fmt.Printf("API(CheatB): srcDir: %v, destDir: %s\n", srcDir, destDir)
 	}
 
 	var nocopy map[string]string

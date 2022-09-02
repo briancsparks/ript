@@ -9,12 +9,16 @@ import (
 	"strings"
 )
 
+// -------------------------------------------------------------------------------------------------------------------
+
 func first(m map[string]string) (string, string, bool) {
 	for k, v := range m {
 		return k, v, true
 	}
 	return "", "", false
 }
+
+// -------------------------------------------------------------------------------------------------------------------
 
 func asserter(test bool) bool {
 	if !test {
@@ -23,11 +27,15 @@ func asserter(test bool) bool {
 	return !test
 }
 
+// -------------------------------------------------------------------------------------------------------------------
+
 func assertMsg(test bool, msg string) {
 	if !test {
 		breakout(msg, false)
 	}
 }
+
+// -------------------------------------------------------------------------------------------------------------------
 
 func assert(test bool) {
 	if !test {
@@ -35,11 +43,15 @@ func assert(test bool) {
 	}
 }
 
+// -------------------------------------------------------------------------------------------------------------------
+
 func breakout(msg string, quiet bool) {
 	if !quiet {
 		fmt.Printf("  ------------ BREAKOUT!! %v !!\n", msg)
 	}
 }
+
+// -------------------------------------------------------------------------------------------------------------------
 
 func joinMap(m *map[string]string) string {
 	result := ""
@@ -49,12 +61,16 @@ func joinMap(m *map[string]string) string {
 	return result
 }
 
+// -------------------------------------------------------------------------------------------------------------------
+
 func trimPrefix(s, prefix string) string {
 	if strings.HasPrefix(s, prefix) {
 		return s[len(prefix):]
 	}
 	return s
 }
+
+// -------------------------------------------------------------------------------------------------------------------
 
 func TrimPathPrefix(s, prefix string) string {
 	if strings.HasPrefix(s, prefix) {
@@ -67,6 +83,8 @@ func TrimPathPrefix(s, prefix string) string {
 	return s
 }
 
+// -------------------------------------------------------------------------------------------------------------------
+
 func listHasPrefix(s string, l []string) bool {
 	for _, s2 := range l {
 		if strings.HasPrefix(s, s2) {
@@ -76,6 +94,8 @@ func listHasPrefix(s string, l []string) bool {
 	return false
 }
 
+// -------------------------------------------------------------------------------------------------------------------
+
 func Cwd() string {
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -84,7 +104,9 @@ func Cwd() string {
 	return cwd
 }
 
-func mkdirp(destPath string, perm os.FileMode) error {
+// -------------------------------------------------------------------------------------------------------------------
+
+func mkdirp(destPath string, perm os.FileMode) {
 	if ConfigVerbose() {
 		fmt.Printf("mkdir -p : %x :%s\n", perm, destPath)
 	}
@@ -93,6 +115,4 @@ func mkdirp(destPath string, perm os.FileMode) error {
 	if err != nil {
 		log.Panic(err)
 	}
-
-	return nil
 }
