@@ -2,4 +2,4 @@
 
 package ript
 
-var isActiveDevelopment bool = true
+var IsActiveDevelopment string = "true"

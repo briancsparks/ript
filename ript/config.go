@@ -1,7 +1,5 @@
 package ript
 
-import "fmt"
-
 /* Copyright © 2022 Brian C Sparks <briancsparks@gmail.com> -- MIT (see LICENSE file) */
 
 //go:generate go run genconfig.go
@@ -23,8 +21,11 @@ var theConfig *Config
 func init() {
 	theConfig = &Config{}
 
-	theConfig.ActiveD = isActiveDevelopment
-	fmt.Printf("theConfig.ActiveD: %v\n", theConfig.ActiveD)
+  theConfig.ActiveD = false
+  if IsActiveDevelopment == "true" {
+    theConfig.ActiveD = true
+  }
+	//fmt.Printf("theConfig.ActiveD: %v\n", theConfig.ActiveD)
 
 	//theConfig.Verbose = true
 	//theConfig.LogApis = true
