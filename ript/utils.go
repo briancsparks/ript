@@ -56,6 +56,34 @@ func trimPrefix(s, prefix string) string {
 	return s
 }
 
+func TrimPathPrefix(s, prefix string) string {
+	if strings.HasPrefix(s, prefix) {
+		_, rest, found := strings.Cut(s, "/")
+		if found {
+			return rest
+		}
+		return s[len(prefix)+1:]
+	}
+	return s
+}
+
+func listHasPrefix(s string, l []string) bool {
+	for _, s2 := range l {
+		if strings.HasPrefix(s, s2) {
+			return true
+		}
+	}
+	return false
+}
+
+func Cwd() string {
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Panic(err)
+	}
+	return cwd
+}
+
 func mkdirp(destPath string, perm os.FileMode) error {
 	if ConfigVerbose() {
 		fmt.Printf("mkdir -p : %x :%s\n", perm, destPath)
