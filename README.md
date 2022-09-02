@@ -1,5 +1,22 @@
 # Hello Fooprojectname
 
+## TODO: version number
+
+(And how to do isActiveDevelopment)
+You can use the linker to set variables inside the app.
+
+See:
+
+- Explaining how the Go build tool helps for this
+  - https://github.com/golang/go/wiki/GcToolchainTricks#including-build-information-in-the-executable
+- Lots of examples
+  - https://stackoverflow.com/questions/11354518/application-auto-build-versioning
+- Article(s)
+  - https://www.digitalocean.com/community/tutorials/using-ldflags-to-set-version-information-for-go-applications
+  - Using git tags:
+    - https://www.forkingbytes.com/blog/dynamic-versioning-your-go-application/
+
+
 ## Ript is Replace-In-File sans the Template Engine
 
 Template engines are great, but are overkill in many situations. If you don't need the power -
