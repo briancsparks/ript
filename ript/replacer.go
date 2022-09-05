@@ -31,6 +31,18 @@ func NewReplacer(r io.Reader, replacements map[string]string) *Replacer {
 
 // -------------------------------------------------------------------------------------------------------------------
 
+//func NewReplacer(r io.Reader, replacements map[string]string) *io.Reader {
+//  rplr := Replacer{
+//    origReader:   r,
+//    replacements: replacements,
+//  }
+//  rplr.scanner = bufio.NewScanner(rplr.origReader)
+//
+//  return &rplr
+//}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 func (rplr *Replacer) Read(p []byte) (int, error) {
 
 	count := 0

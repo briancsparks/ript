@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 /* Copyright © 2022 Brian C Sparks <briancsparks@gmail.com> -- MIT (see LICENSE file) */
@@ -73,7 +74,7 @@ func Cheat2B(srcDir, destDir, tname string) error {
 	}
 
 	if IsProd() {
-		return cheatTarfile2(srcDir, destDir, tname, nocopy, replacements)
+		return cheatTarfile2(srcDir, destDir, tname, nocopy, &replacements)
 	}
 
 	// ================================================
@@ -100,7 +101,10 @@ func Cheat2B(srcDir, destDir, tname string) error {
 
 		// Figure out the source and destination dirs
 		srcPath := filepath.Clean(filepath.Join(srcDir, shortPath))
-		destPath := filepath.Clean(filepath.Join(destDir, replaceEmAll(shortPath, replacements)))
+		destPath := filepath.Join(destDir, shortPath)
+		// Put callback here - we have all info, let callback do any dest path translation
+
+		destPath = filepath.Clean(replaceEmAll2(destPath, &replacements))
 
 		// Save a bunch of work
 		if dirent.IsDir() {
@@ -124,7 +128,7 @@ func Cheat2B(srcDir, destDir, tname string) error {
 				}
 				defer srcFd.Close()
 
-				putFile2(srcFd, destPath, replacements, fi.Mode())
+				putFile2(srcFd, destPath, fi.Mode(), &replacements)
 			}()
 		}
 
@@ -139,33 +143,7 @@ func Cheat2B(srcDir, destDir, tname string) error {
 
 // -------------------------------------------------------------------------------------------------------------------
 
-func putFile2(srcFd io.Reader, destName string, replacements map[string]string, perm os.FileMode) {
-
-	if ConfigVerbose() {
-		fmt.Printf("putFile2 : %v :%s\n", perm, destName)
-	}
-
-	if ConfigClobber() {
-		destFd, err := os.OpenFile(destName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
-		if err != nil {
-			fmt.Printf("While trying to create %s\n", destName)
-			log.Panic(err)
-		}
-		defer destFd.Close()
-
-		replacer := NewReplacer(srcFd, replacements)
-		count, err := io.Copy(destFd, replacer)
-		if err != nil {
-			log.Panic(err)
-		}
-		_ = count
-
-	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-func cheatTarfile2(srcDir, destDir, tname string, nocopy map[string]string, replacements map[string]string) error {
+func cheatTarfile2(srcDir, destDir, tname string, nocopy map[string]string, replacements *map[string]string) error {
 
 	tarfile, err := templates.Open(filepath.Join("templates", tname+".tar"))
 	if err != nil {
@@ -190,12 +168,58 @@ func cheatTarfile2(srcDir, destDir, tname string, nocopy map[string]string, repl
 			continue
 		}
 
-		destPath := replaceEmAll(filepath.Join(destDir, hdr.Name), replacements)
+		destPath := filepath.Join(destDir, hdr.Name)
+		// Put callback here - we have all info, let callback do any dest path translation
+
+		destPath = replaceEmAll2(destPath, replacements)
 		mkdirp(filepath.Dir(destPath), 0755) // TODO: Magic Number
 
 		// Copy files
-		putFile2(tr, destPath, replacements, os.FileMode(hdr.Mode))
+		putFile2(tr, destPath, os.FileMode(hdr.Mode), replacements)
 	}
 
 	return nil
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// Pass nil for replacements for binary file
+
+func putFile2(srcFd io.Reader, destName string, perm os.FileMode, replacements *map[string]string) {
+	var count int64
+
+	if ConfigVerbose() {
+		fmt.Printf("putFile2 : %v :%s\n", perm, destName)
+	}
+
+	if ConfigClobber() {
+		destFd, err := os.OpenFile(destName, os.O_APPEND|os.O_CREATE|os.O_WRONLY, perm)
+		if err != nil {
+			fmt.Printf("While trying to create %s\n", destName)
+			log.Panic(err)
+		}
+		defer destFd.Close()
+
+		if replacements != nil {
+			replacer := NewReplacer(srcFd, *replacements)
+			count, err = io.Copy(destFd, replacer)
+
+		} else {
+			count, err = io.Copy(destFd, srcFd)
+		}
+
+		if err != nil {
+			log.Panic(err)
+		}
+		_ = count
+
+	}
+}
+
+func replaceEmAll2(str string, replacements *map[string]string) string {
+	result := str
+	for oldStr, newStr := range *replacements {
+		result = strings.ReplaceAll(result, oldStr, newStr)
+	}
+
+	return result
 }
