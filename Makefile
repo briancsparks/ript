@@ -6,15 +6,17 @@ VERSION="v0.9.9"
 LDFLAGS_DBG=-ldflags "-X github.com/briancsparks/ript/ript.IsActiveDevelopment=true"
 LDFLAGS_REL=-ldflags "-X github.com/briancsparks/ript/ript.Version=${VERSION} -X github.com/briancsparks/ript/ript.IsActiveDevelopment=false"
 
+outdir:
+	mkdir -p ../scratch/one
 
 dev:
-	go run ${LDFLAGS_DBG} ript.go cheat gocli --projectname=ript --dest=../scratch/one
+	go run ${LDFLAGS_DBG} cmd/main/ript.go cheat gocli --projectname=ript --dest=../scratch/one
 
 showversiond:
-	go run ${LDFLAGS_DBG} ript.go version
+	go run ${LDFLAGS_DBG} cmd/main/ript.go version
 
 showversionr:
-	go run ${LDFLAGS_REL} ript.go version
+	go run ${LDFLAGS_REL} cmd/main/ript.go version
 
 
 cleandev:
@@ -33,10 +35,10 @@ ript/config_generated.go: ript/genconfig.go
 	go generate ript/genconfig.go
 
 riptd.exe: ript/templates/gocli.tar ript/config_generated.go
-	go build ${LDFLAGS_DBG} -o ./riptd.exe ript.go
+	go build ${LDFLAGS_DBG} -o ./riptd.exe cmd/main/ript.go
 
 riptr.exe: generate
-	go build ${LDFLAGS_REL} -tags release -o ./riptr.exe ript.go
+	go build ${LDFLAGS_REL} -tags release -o ./riptr.exe cmd/main/ript.go
 
 builddbg: riptd.exe
 
@@ -44,4 +46,5 @@ buildrel: riptr.exe
 
 installlocal: buildrel
 	cp riptr.exe $(HOME)/bin/ript
+	rm riptr.exe
 

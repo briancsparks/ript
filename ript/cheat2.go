@@ -145,7 +145,7 @@ func Cheat2B(srcDir, destDir, tname string) error {
 
 func cheatTarfile2(srcDir, destDir, tname string, nocopy map[string]string, replacements *map[string]string) error {
 
-	tarfile, err := templates.Open(filepath.Join("templates", tname+".tar"))
+	tarfile, err := templates.Open("templates/" + tname + ".tar")
 	if err != nil {
 		log.Panic(err)
 	}

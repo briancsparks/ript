@@ -254,7 +254,8 @@ func cheatTarfile(srcDir, destDir, tname string, nocopy map[string]string, repla
 
 	srcFS := templates
 
-	tarFilename := filepath.Join("templates", tname+".tar")
+  // embedded FS is unix-path
+  tarFilename := "templates/" + tname + ".tar"
 
 	tarfile, err := srcFS.Open(tarFilename)
 	if err != nil {
